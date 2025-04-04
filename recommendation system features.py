@@ -246,3 +246,63 @@ if __name__ == "__main__":
 # Some features (like valence) are quite subjective and may require further refinement
 # You might want to normalize the features across your dataset
 # For production, you'll likely want to optimize this code for performance
+
+# %%
+#%%
+import pandas as pd
+from sklearn.neighbors import NearestNeighbors
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+
+# Load dataset
+songs_df = pd.read_csv('csv/features_df_2025_03_17.csv')
+
+songs_df_processed = songs_df.drop('filename',axis=1)
+
+# Normalize features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(songs_df_processed)
+
+# Split
+X_train, X_test = train_test_split(X_scaled, train_size=0.8)
+
+# Fit Nearest Neighbors model
+nn_model = NearestNeighbors(n_neighbors=6, algorithm='auto')
+nn_model.fit(X_train)
+
+rec_songs = []
+
+for i in range(5):
+    query_index = i
+    query_vector = X_test[query_index].reshape(1, -1)
+
+    # Get nearest neighbors
+    distances, indices = nn_model.kneighbors(query_vector)
+
+    # Show recommended songs (excluding the query song itself)
+    recommended = songs_df.iloc[indices[0][1:]].iloc[0]
+    # print(songs_df.loc[query_index])
+    # print(recommended[['filename']])
+
+    rec_songs.append(recommended[['filename']])
+
+for i in range(5):
+    print(rec_songs[i])
+
+# %%
+def recommend_song(filepath, songs_df, nn_model):
+    scaler = StandardScaler()
+
+    features = extract_features(filepath)
+    test_df = pd.DataFrame([features])
+    if 'filename' in test_df.columns:
+        test_df = test_df.drop(columns='filename')
+    test_scaled = scaler.fit_transform(test_df)
+    distances, indices = nn_model.kneighbors(test_scaled)
+    recommended = songs_df.iloc[indices[0][1:]].iloc[0]
+    return recommended[['filename']]
+
+# %%
+recommend_song('drake_fps.mp3', songs_df, nn_model)
+# %%
