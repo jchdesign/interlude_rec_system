@@ -45,17 +45,17 @@ X_scaled = scaler.fit_transform(songs_features)
 
 # Step 4: Apply weights to numerical features
 feature_weights = {
-    'tempo': 0.5,
-    'acousticness': 1.0,
-    'dynamic_range': 1.0,
-    'energy': 1.0,
-    'brightness': 1.0,
-    'fullness': 1.0,
-    'density': 1.0,
-    'instrumentalness': 1.0,
-    'danceability': 1.0,
-    'valence': 1.0,
-    'tension': 1.0,
+    'tempo': 0.5,               # slight influence, but not dominant
+    'acousticness': 0.5,         # minor
+    'dynamic_range': 0.2,        # very minor
+    'energy': 2.0,               # STRONG
+    'brightness': 0.5,           # minor
+    'fullness': 0.2,             # very minor
+    'density': 0.2,              # very minor
+    'instrumentalness': 1.0,     # small
+    'danceability': 1.5,         # STRONG
+    'valence': 2.0,              # VERY STRONG
+    'tension': 1.5,              # STRONG
 }
 
 # Step 5: Apply weights to all relevant columns
@@ -63,7 +63,7 @@ for col in X_scaled.columns:
     if col in feature_weights:
         X_scaled[col] *= feature_weights[col]
     elif col.startswith("genre_"):
-        X_scaled[col] *= 5.0  # or another weight for genre impact
+        X_scaled[col] *= 4.0  # or another weight for genre impact
 
 # Step 6: Fit Nearest Neighbors model
 nn_model = NearestNeighbors(n_neighbors=5, algorithm='auto')
@@ -104,7 +104,7 @@ def recommend_song(features, songs_df, nn_model, scaler, feature_weights):
         if col in feature_weights:
             test_scaled[col] *= feature_weights[col]
         elif col.startswith("genre_"):
-            test_scaled[col] *= 5.0  # or your preferred genre weight
+            test_scaled[col] *= 2.0  # or your preferred genre weight
 
     # --- Find nearest neighbors ---
     distances, indices = nn_model.kneighbors(test_scaled)
@@ -117,7 +117,7 @@ import os
 import pandas as pd
 from datetime import datetime
 
-for name in ['tj', 'karen', 'anita']:
+for name in ['ankur', 'tj_bro', 'tj_cousin']:
     file_path = os.path.join(name, 'songs')
     features = []
 
@@ -153,9 +153,9 @@ import os
 import pandas as pd
 from datetime import datetime
 
-for name in ['tj', 'karen', 'anita']:
+for name in ['ankur', 'tj_bro', 'tj_cousin']:
     file_path = os.path.join(name, 'recs')
-    song_features_df = pd.read_csv(os.path.join(file_path, 'features_df_2025-04-21.csv'))
+    song_features_df = pd.read_csv(os.path.join(file_path, 'features_df_2025-04-23.csv'))
 
     recs = []
 
